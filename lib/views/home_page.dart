@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:ezan_vakitleri/models/prayertime.dart';
+import 'package:ezan_vakitleri/services/db_services.dart';
 import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
 import '../components/drawer_menu.dart';
@@ -18,17 +19,69 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final box = GetStorage();
+  var apiServices = ApiServices();
+  var dbServices = DbServices();
+  var services = Services();
   Timer? timer;
-  int toDayIndex = -1;
-  int townId = 9541;
-  String townName = 'İSTANBUL';
+  List<PrayerTime> prayertimeList = [];
+  String savedDay = '';
+  int todayIndex = -1;
+  int townId = 0;
+  String townName = '';
   List<bool> isVisible = [false, false, false, false, false, false];
   String remaining = '';
+  bool isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (box.read('townId') != null) {
+      townId = box.read('townId');
+    }
+    if (box.read('townName') != null) {
+      townName = box.read('townName');
+    }
+    if (box.read('savedDay') != null) {
+      savedDay = box.read('savedDay');
+      if (savedDay == DateTime.now().toString().substring(0, 10)) {
+        getLocalData();
+      } else {
+        getApiData();
+      }
+    } else {
+      getApiData();
+    }
+  }
+
+  getApiData() async {
+    setState(() {
+      isLoading = true;
+    });
+    box.write('savedDay', DateTime.now().toString().substring(0, 10));
+    prayertimeList = await apiServices.getPrayerTimes(townId);
+    await services.saveLocalData(prayertimeList);
+    findTodayIndex();
+    setState(() {
+      isLoading = false;
+    });
+  }
+
+  void getLocalData() async {
+    setState(() {
+      isLoading = true;
+    });
+    prayertimeList = await services.getLocalData();
+    findTodayIndex();
+    setState(() {
+      isLoading = false;
+    });
+  }
 
   void initTimer() {
     if (timer != null && timer!.isActive) return;
     timer = Timer.periodic(const Duration(seconds: 10), (timer) {
-      //job
+      //
+      findRemainingTime();
       setState(() {});
     });
   }
@@ -39,24 +92,19 @@ class _HomePageState extends State<HomePage> {
     super.dispose();
   }
 
-  void findLocal() {
-    if (box.read('townId') != null) {
-      townId = box.read('townId');
-    }
-    if (box.read('townName') != null) {
-      townName = box.read('townName');
-    }
-  }
-
-  void findDay(AsyncSnapshot snapshot) {
+  void findTodayIndex() {
     bool isDayIndex = false;
-    String dt1 = DateTime.now().toString();
-    if (toDayIndex == -1) {
-      toDayIndex++;
+    String dt1 = DateTime.now().toString().substring(0, 10);
+    String dt2 = '';
+    if (todayIndex == -1) {
+      todayIndex++;
       do {
-        String dt2 = snapshot.data![toDayIndex].gregorianDateLongIso8601;
-        if (dt1.substring(10) != dt2.substring(10)) {
-          toDayIndex++;
+        dt2 = prayertimeList[todayIndex]
+            .gregorianDateLongIso8601
+            .toString()
+            .substring(0, 10);
+        if (dt1 != dt2) {
+          todayIndex++;
         } else {
           isDayIndex = true;
         }
@@ -64,14 +112,14 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  void findRemainingTime(AsyncSnapshot snapshot) {
+  void findRemainingTime() {
     String timeNow = DateTime.now().toString().substring(11, 16);
-    String time0 = snapshot.data![toDayIndex].fajr;
-    String time1 = snapshot.data![toDayIndex].sunrise;
-    String time2 = snapshot.data![toDayIndex].dhuhr;
-    String time3 = snapshot.data![toDayIndex].asr;
-    String time4 = snapshot.data![toDayIndex].maghrib;
-    String time5 = snapshot.data![toDayIndex].isha;
+    String time0 = prayertimeList[todayIndex].fajr.toString();
+    String time1 = prayertimeList[todayIndex].sunrise.toString();
+    String time2 = prayertimeList[todayIndex].dhuhr.toString();
+    String time3 = prayertimeList[todayIndex].asr.toString();
+    String time4 = prayertimeList[todayIndex].maghrib.toString();
+    String time5 = prayertimeList[todayIndex].isha.toString();
     int timeNowInt =
         int.parse(timeNow.substring(0, 2)) * 60 + int.parse(timeNow.substring(3, 5));
     int time0Int =
@@ -89,50 +137,45 @@ class _HomePageState extends State<HomePage> {
     if (timeNowInt > time5Int || timeNowInt < time0Int) {
       isVisible = [true, false, false, false, false, false];
       if (timeNowInt > time5Int) {
-        remaining = Services().calcHoursMinutes((1440 - timeNowInt) + time0Int);
+        remaining = services.calcHoursMinutes((1440 - timeNowInt) + time0Int);
       } else {
-        remaining = Services().calcHoursMinutes(time0Int - timeNowInt);
+        remaining = services.calcHoursMinutes(time0Int - timeNowInt);
       }
     }
     if (timeNowInt > time0Int && timeNowInt < time1Int) {
       isVisible = [false, true, false, false, false, false];
-      remaining = Services().calcHoursMinutes(time1Int - timeNowInt);
+      remaining = services.calcHoursMinutes(time1Int - timeNowInt);
     }
     if (timeNowInt > time1Int && timeNowInt < time2Int) {
       isVisible = [false, false, true, false, false, false];
-      remaining = Services().calcHoursMinutes(time2Int - timeNowInt);
+      remaining = services.calcHoursMinutes(time2Int - timeNowInt);
     }
     if (timeNowInt > time2Int && timeNowInt < time3Int) {
       isVisible = [false, false, false, true, false, false];
-      remaining = Services().calcHoursMinutes(time3Int - timeNowInt);
+      remaining = services.calcHoursMinutes(time3Int - timeNowInt);
     }
     if (timeNowInt > time3Int && timeNowInt < time4Int) {
       isVisible = [false, false, false, false, true, false];
-      remaining = Services().calcHoursMinutes(time4Int - timeNowInt);
+      remaining = services.calcHoursMinutes(time4Int - timeNowInt);
     }
     if (timeNowInt > time4Int && timeNowInt < time5Int) {
       isVisible = [false, false, false, false, false, true];
-      remaining = Services().calcHoursMinutes(time5Int - timeNowInt);
+      remaining = services.calcHoursMinutes(time5Int - timeNowInt);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    initTimer();
     return Scaffold(
       drawer: const DrawerMenu(),
       appBar: AppBar(
         centerTitle: true,
         title: const Text('Ezan Vakitleri'),
       ),
-      body: FutureBuilder<List<PrayerTime>>(
-        future: ApiServices().getPrayerTimes(townId),
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            initTimer();
-            findLocal();
-            findDay(snapshot);
-            findRemainingTime(snapshot);
-            return Column(
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : Column(
               children: [
                 Expanded(
                   flex: 2,
@@ -145,8 +188,8 @@ class _HomePageState extends State<HomePage> {
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         TopLabel(data: townName),
-                        TopLabel(data: snapshot.data![toDayIndex].gregorianDateLong),
-                        TopLabel(data: snapshot.data![toDayIndex].hijriDateLong),
+                        TopLabel(data: prayertimeList[todayIndex].gregorianDateLong),
+                        TopLabel(data: prayertimeList[todayIndex].hijriDateLong),
                       ],
                     ),
                   ),
@@ -166,49 +209,43 @@ class _HomePageState extends State<HomePage> {
                             label: 'İmsaka kalan ',
                             remainingTime: remaining),
                         TimeLabel(
-                            label: 'İMSAK :', time: snapshot.data![toDayIndex].fajr),
+                            label: 'İMSAK :', time: prayertimeList[todayIndex].fajr),
                         RemainingTimeLabel(
                             isVisible: isVisible[1],
                             label: 'Güneşe kalan ',
                             remainingTime: remaining),
                         TimeLabel(
-                            label: 'GÜNEŞ :', time: snapshot.data![toDayIndex].sunrise),
+                            label: 'GÜNEŞ :', time: prayertimeList[todayIndex].sunrise),
                         RemainingTimeLabel(
                             isVisible: isVisible[2],
                             label: 'Öğlene kalan ',
                             remainingTime: remaining),
                         TimeLabel(
-                            label: 'ÖĞLEN :', time: snapshot.data![toDayIndex].dhuhr),
+                            label: 'ÖĞLEN :', time: prayertimeList[todayIndex].dhuhr),
                         RemainingTimeLabel(
                             isVisible: isVisible[3],
                             label: 'İkindine kalan ',
                             remainingTime: remaining),
                         TimeLabel(
-                            label: 'İKİNDİ :', time: snapshot.data![toDayIndex].asr),
+                            label: 'İKİNDİ :', time: prayertimeList[todayIndex].asr),
                         RemainingTimeLabel(
                             isVisible: isVisible[4],
                             label: 'Akşama kalan ',
                             remainingTime: remaining),
                         TimeLabel(
-                            label: 'AKŞAM :', time: snapshot.data![toDayIndex].maghrib),
+                            label: 'AKŞAM :', time: prayertimeList[todayIndex].maghrib),
                         RemainingTimeLabel(
                             isVisible: isVisible[5],
                             label: 'Yatsıya kalan ',
                             remainingTime: remaining),
                         TimeLabel(
-                            label: 'YATSI :', time: snapshot.data![toDayIndex].isha),
+                            label: 'YATSI :', time: prayertimeList[todayIndex].isha),
                       ],
                     ),
                   ),
                 ),
               ],
-            );
-          } else if (snapshot.hasError) {
-            return Text('${snapshot.error}');
-          }
-          return const Center(child: CircularProgressIndicator());
-        },
-      ),
+            ),
     );
   }
 }

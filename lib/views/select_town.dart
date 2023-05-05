@@ -12,6 +12,8 @@ class SelectTown extends StatefulWidget {
 }
 
 class _SelectTownState extends State<SelectTown> {
+  var apiServices = ApiServices();
+
   late Future<MyTown> futureCountry;
   final box = GetStorage();
 
@@ -24,22 +26,23 @@ class _SelectTownState extends State<SelectTown> {
         title: const Text('İLÇE SEÇ'),
       ),
       body: FutureBuilder<List<MyTown>>(
-        future: ApiServices().getTowns(id),
+        future: apiServices.getTowns(id),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             return ListView.builder(
-                itemCount: snapshot.data!.length,
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    title: Text(snapshot.data![index].name.toString()),
-                    onTap: () {
-                      box.write('townId', snapshot.data![index].id);
-                      box.write('townName', snapshot.data![index].name);
-                      Navigator.push(context,
-                          MaterialPageRoute(builder: (context) => const HomePage()));
-                    },
-                  );
-                });
+              itemCount: snapshot.data!.length,
+              itemBuilder: (context, index) {
+                return ListTile(
+                  title: Text(snapshot.data![index].name.toString()),
+                  onTap: () {
+                    box.write('townId', snapshot.data![index].id);
+                    box.write('townName', snapshot.data![index].name);
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) => const HomePage()));
+                  },
+                );
+              },
+            );
           } else if (snapshot.hasError) {
             return Text('${snapshot.error}');
           }

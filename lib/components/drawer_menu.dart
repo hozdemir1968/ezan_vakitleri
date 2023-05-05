@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/dark_mode_provider.dart';
 import '../views/home_page.dart';
+import '../views/monthly_page.dart';
 import '../views/select_country.dart';
 
 class DrawerMenu extends ConsumerStatefulWidget {
@@ -34,6 +35,18 @@ class _DrawerMenuState extends ConsumerState<DrawerMenu> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => const HomePage()),
+                      );
+                    },
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.add_location_alt_outlined),
+                    title: const Text("AYLIK LİSTE"),
+                    trailing: const Icon(Icons.keyboard_arrow_right),
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const MonthlyPage()),
                       );
                     },
                   ),

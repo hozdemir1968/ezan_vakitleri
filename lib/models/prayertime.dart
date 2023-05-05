@@ -1,4 +1,5 @@
 class PrayerTime {
+  int? id;
   String? shapeMoonUrl;
   String? fajr;
   String? sunrise;
@@ -9,9 +10,9 @@ class PrayerTime {
   String? astronomicalSunset;
   String? astronomicalSunrise;
   String? hijriDateShort;
-  Null hijriDateShortIso8601;
+  String? hijriDateShortIso8601;
   String? hijriDateLong;
-  Null hijriDateLongIso8601;
+  String? hijriDateLongIso8601;
   String? qiblaTime;
   String? gregorianDateShort;
   String? gregorianDateShortIso8601;
@@ -19,26 +20,28 @@ class PrayerTime {
   String? gregorianDateLongIso8601;
   int? greenwichMeanTimeZone;
 
-  PrayerTime(
-      {this.shapeMoonUrl,
-      this.fajr,
-      this.sunrise,
-      this.dhuhr,
-      this.asr,
-      this.maghrib,
-      this.isha,
-      this.astronomicalSunset,
-      this.astronomicalSunrise,
-      this.hijriDateShort,
-      this.hijriDateShortIso8601,
-      this.hijriDateLong,
-      this.hijriDateLongIso8601,
-      this.qiblaTime,
-      this.gregorianDateShort,
-      this.gregorianDateShortIso8601,
-      this.gregorianDateLong,
-      this.gregorianDateLongIso8601,
-      this.greenwichMeanTimeZone});
+  PrayerTime({
+    this.id,
+    this.shapeMoonUrl,
+    this.fajr,
+    this.sunrise,
+    this.dhuhr,
+    this.asr,
+    this.maghrib,
+    this.isha,
+    this.astronomicalSunset,
+    this.astronomicalSunrise,
+    this.hijriDateShort,
+    this.hijriDateShortIso8601,
+    this.hijriDateLong,
+    this.hijriDateLongIso8601,
+    this.qiblaTime,
+    this.gregorianDateShort,
+    this.gregorianDateShortIso8601,
+    this.gregorianDateLong,
+    this.gregorianDateLongIso8601,
+    this.greenwichMeanTimeZone,
+  });
 
   PrayerTime.fromJson(Map<String, dynamic> json) {
     shapeMoonUrl = json['shapeMoonUrl'];
@@ -84,5 +87,51 @@ class PrayerTime {
     data['gregorianDateLongIso8601'] = gregorianDateLongIso8601;
     data['greenwichMeanTimeZone'] = greenwichMeanTimeZone;
     return data;
+  }
+
+  PrayerTime.fromMap(Map<String, dynamic> map) {
+    shapeMoonUrl = map['shapeMoonUrl'];
+    fajr = map['fajr'];
+    sunrise = map['sunrise'];
+    dhuhr = map['dhuhr'];
+    asr = map['asr'];
+    maghrib = map['maghrib'];
+    isha = map['isha'];
+    astronomicalSunset = map['astronomicalSunset'];
+    astronomicalSunrise = map['astronomicalSunrise'];
+    hijriDateShort = map['hijriDateShort'];
+    hijriDateShortIso8601 = map['hijriDateShortIso8601'];
+    hijriDateLong = map['hijriDateLong'];
+    hijriDateLongIso8601 = map['hijriDateLongIso8601'];
+    qiblaTime = map['qiblaTime'];
+    gregorianDateShort = map['gregorianDateShort'];
+    gregorianDateShortIso8601 = map['gregorianDateShortIso8601'];
+    gregorianDateLong = map['gregorianDateLong'];
+    gregorianDateLongIso8601 = map['gregorianDateLongIso8601'];
+    greenwichMeanTimeZone = map['greenwichMeanTimeZone'];
+  }
+
+  Map<String, dynamic> toMap() {
+    var map = <String, dynamic>{};
+    map['shapeMoonUrl'] = shapeMoonUrl;
+    map['fajr'] = fajr;
+    map['sunrise'] = sunrise;
+    map['dhuhr'] = dhuhr;
+    map['asr'] = asr;
+    map['maghrib'] = maghrib;
+    map['isha'] = isha;
+    map['astronomicalSunset'] = astronomicalSunset;
+    map['astronomicalSunrise'] = astronomicalSunrise;
+    map['hijriDateShort'] = hijriDateShort;
+    map['hijriDateShortIso8601'] = hijriDateShortIso8601;
+    map['hijriDateLong'] = hijriDateLong;
+    map['hijriDateLongIso8601'] = hijriDateLongIso8601;
+    map['qiblaTime'] = qiblaTime;
+    map['gregorianDateShort'] = gregorianDateShort;
+    map['gregorianDateShortIso8601'] = gregorianDateShortIso8601;
+    map['gregorianDateLong'] = gregorianDateLong;
+    map['gregorianDateLongIso8601'] = gregorianDateLongIso8601;
+    map['greenwichMeanTimeZone'] = greenwichMeanTimeZone;
+    return map;
   }
 }

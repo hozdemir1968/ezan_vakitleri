@@ -12,6 +12,8 @@ class SelectState extends StatefulWidget {
 }
 
 class _SelectStateState extends State<SelectState> {
+  var apiServices = ApiServices();
+
   late Future<MyState> futureCountry;
   final box = GetStorage();
 
@@ -24,7 +26,7 @@ class _SelectStateState extends State<SelectState> {
         title: const Text('ŞEHİR SEÇ'),
       ),
       body: FutureBuilder<List<MyState>>(
-        future: ApiServices().getStates(id),
+        future: apiServices.getStates(id),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             return ListView.builder(

@@ -5,7 +5,6 @@ class ThemeClass {
     scaffoldBackgroundColor: Colors.white,
     appBarTheme: const AppBarTheme(
       backgroundColor: Colors.teal,
-      centerTitle: true,
     ),
   );
 
