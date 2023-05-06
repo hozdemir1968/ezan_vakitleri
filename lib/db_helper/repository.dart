@@ -3,8 +3,8 @@ import 'db_connection.dart';
 
 class Repository {
   final DbConnection _dbConnection = DbConnection();
+  Database? _database;
 
-  static Database? _database;
   Future<Database?> get database async {
     if (_database != null) {
       return _database;

@@ -39,7 +39,7 @@ class _DrawerMenuState extends ConsumerState<DrawerMenu> {
                     },
                   ),
                   ListTile(
-                    leading: const Icon(Icons.add_location_alt_outlined),
+                    leading: const Icon(Icons.list),
                     title: const Text("AYLIK LİSTE"),
                     trailing: const Icon(Icons.keyboard_arrow_right),
                     onTap: () {

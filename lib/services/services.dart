@@ -29,34 +29,34 @@ class Services {
     }
   }
 
-  Future getLocalData() async {
+  Future<List<PrayerTime>> getLocalData() async {
     List<PrayerTime> prayertimeList = [];
     var prayertimes = await DbServices().readAllData();
-    int i = 1;
+    int i = 0;
     prayertimes.forEach((prayertime) {
-      var prayertimeModel = PrayerTime();
-      prayertimeModel.id = i;
-      prayertimeModel.asr = prayertime['asr'];
-      prayertimeModel.astronomicalSunrise = prayertime['astronomicalSunrise'];
-      prayertimeModel.astronomicalSunset = prayertime['astronomicalSunset'];
-      prayertimeModel.dhuhr = prayertime['dhuhr'];
-      prayertimeModel.fajr = prayertime['fajr'];
-      prayertimeModel.greenwichMeanTimeZone = prayertime['greenwichMeanTimeZone'];
-      prayertimeModel.gregorianDateLong = prayertime['gregorianDateLong'];
-      prayertimeModel.gregorianDateLongIso8601 = prayertime['gregorianDateLongIso8601'];
-      prayertimeModel.gregorianDateShort = prayertime['gregorianDateShort'];
-      prayertimeModel.gregorianDateShortIso8601 = prayertime['gregorianDateShortIso8601'];
-      prayertimeModel.hijriDateLong = prayertime['hijriDateLong'];
-      prayertimeModel.hijriDateLongIso8601 = prayertime['hijriDateLongIso8601'];
-      prayertimeModel.hijriDateShort = prayertime['hijriDateShort'];
-      prayertimeModel.hijriDateShortIso8601 = prayertime['hijriDateShortIso8601'];
-      prayertimeModel.isha = prayertime['isha'];
-      prayertimeModel.maghrib = prayertime['maghrib'];
-      prayertimeModel.qiblaTime = prayertime['qiblaTime'];
-      prayertimeModel.shapeMoonUrl = prayertime['shapeMoonUrl'];
-      prayertimeModel.sunrise = prayertime['sunrise'];
+      var prayertimeModel = PrayerTime(
+        id: i++,
+        asr: prayertime['asr'],
+        astronomicalSunrise: prayertime['astronomicalSunrise'],
+        astronomicalSunset: prayertime['astronomicalSunset'],
+        dhuhr: prayertime['dhuhr'],
+        fajr: prayertime['fajr'],
+        greenwichMeanTimeZone: prayertime['greenwichMeanTimeZone'],
+        gregorianDateLong: prayertime['gregorianDateLong'],
+        gregorianDateLongIso8601: prayertime['gregorianDateLongIso8601'],
+        gregorianDateShort: prayertime['gregorianDateShort'],
+        gregorianDateShortIso8601: prayertime['gregorianDateShortIso8601'],
+        hijriDateLong: prayertime['hijriDateLong'],
+        hijriDateLongIso8601: prayertime['hijriDateLongIso8601'],
+        hijriDateShort: prayertime['hijriDateShort'],
+        hijriDateShortIso8601: prayertime['hijriDateShortIso8601'],
+        isha: prayertime['isha'],
+        maghrib: prayertime['maghrib'],
+        qiblaTime: prayertime['qiblaTime'],
+        shapeMoonUrl: prayertime['shapeMoonUrl'],
+        sunrise: prayertime['sunrise'],
+      );
       prayertimeList.add(prayertimeModel);
-      i++;
     });
     return prayertimeList;
   }

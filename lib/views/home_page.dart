@@ -25,7 +25,7 @@ class _HomePageState extends State<HomePage> {
   Timer? timer;
   List<PrayerTime> prayertimeList = [];
   String savedDay = '';
-  int todayIndex = -1;
+  int todayIndex = 0;
   int townId = 0;
   String townName = '';
   List<bool> isVisible = [false, false, false, false, false, false];
@@ -51,9 +51,10 @@ class _HomePageState extends State<HomePage> {
     } else {
       getApiData();
     }
+    initTimer();
   }
 
-  getApiData() async {
+  void getApiData() async {
     setState(() {
       isLoading = true;
     });
@@ -61,6 +62,7 @@ class _HomePageState extends State<HomePage> {
     prayertimeList = await apiServices.getPrayerTimes(townId);
     await services.saveLocalData(prayertimeList);
     findTodayIndex();
+    findRemainingTime();
     setState(() {
       isLoading = false;
     });
@@ -72,6 +74,7 @@ class _HomePageState extends State<HomePage> {
     });
     prayertimeList = await services.getLocalData();
     findTodayIndex();
+    findRemainingTime();
     setState(() {
       isLoading = false;
     });
@@ -80,7 +83,7 @@ class _HomePageState extends State<HomePage> {
   void initTimer() {
     if (timer != null && timer!.isActive) return;
     timer = Timer.periodic(const Duration(seconds: 10), (timer) {
-      //
+      findTodayIndex();
       findRemainingTime();
       setState(() {});
     });
@@ -96,20 +99,16 @@ class _HomePageState extends State<HomePage> {
     bool isDayIndex = false;
     String dt1 = DateTime.now().toString().substring(0, 10);
     String dt2 = '';
-    if (todayIndex == -1) {
-      todayIndex++;
-      do {
-        dt2 = prayertimeList[todayIndex]
-            .gregorianDateLongIso8601
-            .toString()
-            .substring(0, 10);
-        if (dt1 != dt2) {
-          todayIndex++;
-        } else {
-          isDayIndex = true;
-        }
-      } while (isDayIndex);
-    }
+    todayIndex = 0;
+    do {
+      dt2 =
+          prayertimeList[todayIndex].gregorianDateLongIso8601.toString().substring(0, 10);
+      if (dt1 != dt2) {
+        todayIndex++;
+      } else {
+        isDayIndex = true;
+      }
+    } while (isDayIndex);
   }
 
   void findRemainingTime() {
@@ -166,13 +165,11 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    initTimer();
     return Scaffold(
-      drawer: const DrawerMenu(),
       appBar: AppBar(
-        centerTitle: true,
         title: const Text('Ezan Vakitleri'),
       ),
+      drawer: const DrawerMenu(),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : Column(
