@@ -28,9 +28,9 @@ class MonthlyPage extends StatelessWidget {
                         ],
                       ),
                       const SizedBox(height: 8),
-                      Row(
+                      const Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: const [
+                        children: [
                           Text('İmsak', style: TextStyle(fontSize: 16)),
                           Text('Güneş', style: TextStyle(fontSize: 16)),
                           Text('Öğlen', style: TextStyle(fontSize: 16)),

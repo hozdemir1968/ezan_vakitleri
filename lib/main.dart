@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get_storage/get_storage.dart';
 import 'providers/dark_mode_provider.dart';
-import 'splash.dart';
+import 'views/splash.dart';
 import 'themes/themes.dart';
 
 void main() async {

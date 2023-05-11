@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class TimeLabel extends StatelessWidget {
-  const TimeLabel({
+class LabelLabelTime extends StatelessWidget {
+  const LabelLabelTime({
     super.key,
     required this.label,
     required this.time,

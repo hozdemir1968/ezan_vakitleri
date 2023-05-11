@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
-import 'views/home_page.dart';
-import 'views/select_country.dart';
+import 'home_page.dart';
+import 'select_country.dart';
 
 class Splash extends StatelessWidget {
   const Splash({super.key});

@@ -4,9 +4,8 @@ import 'package:ezan_vakitleri/services/db_services.dart';
 import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
 import '../components/drawer_menu.dart';
-import '../components/time_label_widget.dart';
-import '../components/top_label_widget.dart';
-import '../components/remaining_time_label_widget.dart';
+import '../components/label_label_time.dart';
+import '../components/label_remaining_time.dart';
 import '../services/api_services.dart';
 import '../services/services.dart';
 
@@ -24,16 +23,17 @@ class _HomePageState extends State<HomePage> {
   var services = Services();
   Timer? timer;
   List<PrayerTime> prayertimeList = [];
-  String savedDay = '';
   int todayIndex = 0;
   int townId = 0;
   String townName = '';
+  String savedDay = '';
   List<bool> isVisible = [false, false, false, false, false, false];
   String remaining = '';
   bool isLoading = false;
 
   @override
   void initState() {
+    print('initstate run');
     super.initState();
     if (box.read('townId') != null) {
       townId = box.read('townId');
@@ -55,12 +55,13 @@ class _HomePageState extends State<HomePage> {
   }
 
   void getApiData() async {
+    print('getapidata run');
     setState(() {
       isLoading = true;
     });
-    box.write('savedDay', DateTime.now().toString().substring(0, 10));
     prayertimeList = await apiServices.getPrayerTimes(townId);
     await services.saveLocalData(prayertimeList);
+    box.write('savedDay', DateTime.now().toString().substring(0, 10));
     findTodayIndex();
     findRemainingTime();
     setState(() {
@@ -69,6 +70,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   void getLocalData() async {
+    print('getlocaldata run');
     setState(() {
       isLoading = true;
     });
@@ -81,8 +83,10 @@ class _HomePageState extends State<HomePage> {
   }
 
   void initTimer() {
+    print('inittimer run');
     if (timer != null && timer!.isActive) return;
     timer = Timer.periodic(const Duration(seconds: 10), (timer) {
+      checkToday();
       findTodayIndex();
       findRemainingTime();
       setState(() {});
@@ -95,8 +99,20 @@ class _HomePageState extends State<HomePage> {
     super.dispose();
   }
 
+  void checkToday() {
+    print('checktoday run');
+    String dt1 = savedDay;
+    String dt2 = DateTime.now().toString().substring(0, 10);
+    if (dt1 == dt2) {
+      debugPrint('eşit');
+    } else {
+      getApiData();
+    }
+  }
+
   void findTodayIndex() {
-    bool isDayIndex = false;
+    print('findtodayindex run');
+    bool isDayIndex = true;
     String dt1 = DateTime.now().toString().substring(0, 10);
     String dt2 = '';
     todayIndex = 0;
@@ -106,7 +122,7 @@ class _HomePageState extends State<HomePage> {
       if (dt1 != dt2) {
         todayIndex++;
       } else {
-        isDayIndex = true;
+        isDayIndex = false;
       }
     } while (isDayIndex);
   }
@@ -165,6 +181,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    print('build run');
     return Scaffold(
       appBar: AppBar(
         title: const Text('Ezan Vakitleri'),
@@ -183,10 +200,13 @@ class _HomePageState extends State<HomePage> {
                     decoration: BoxDecoration(border: Border.all(color: Colors.black)),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        TopLabel(data: townName),
-                        TopLabel(data: prayertimeList[todayIndex].gregorianDateLong),
-                        TopLabel(data: prayertimeList[todayIndex].hijriDateLong),
+                        Text(townName, style: const TextStyle(fontSize: 18)),
+                        Text(prayertimeList[todayIndex].gregorianDateLong.toString(),
+                            style: const TextStyle(fontSize: 18)),
+                        Text(prayertimeList[todayIndex].hijriDateLong.toString(),
+                            style: const TextStyle(fontSize: 18)),
                       ],
                     ),
                   ),
@@ -201,42 +221,54 @@ class _HomePageState extends State<HomePage> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        RemainingTimeLabel(
+                        LabelRemainingTime(
                             isVisible: isVisible[0],
                             label: 'İmsaka kalan ',
                             remainingTime: remaining),
-                        TimeLabel(
-                            label: 'İMSAK :', time: prayertimeList[todayIndex].fajr),
-                        RemainingTimeLabel(
+                        LabelLabelTime(
+                          label: 'İMSAK :',
+                          time: prayertimeList[todayIndex].fajr,
+                        ),
+                        LabelRemainingTime(
                             isVisible: isVisible[1],
                             label: 'Güneşe kalan ',
                             remainingTime: remaining),
-                        TimeLabel(
-                            label: 'GÜNEŞ :', time: prayertimeList[todayIndex].sunrise),
-                        RemainingTimeLabel(
+                        LabelLabelTime(
+                          label: 'GÜNEŞ :',
+                          time: prayertimeList[todayIndex].sunrise,
+                        ),
+                        LabelRemainingTime(
                             isVisible: isVisible[2],
                             label: 'Öğlene kalan ',
                             remainingTime: remaining),
-                        TimeLabel(
-                            label: 'ÖĞLEN :', time: prayertimeList[todayIndex].dhuhr),
-                        RemainingTimeLabel(
+                        LabelLabelTime(
+                          label: 'ÖĞLEN :',
+                          time: prayertimeList[todayIndex].dhuhr,
+                        ),
+                        LabelRemainingTime(
                             isVisible: isVisible[3],
                             label: 'İkindine kalan ',
                             remainingTime: remaining),
-                        TimeLabel(
-                            label: 'İKİNDİ :', time: prayertimeList[todayIndex].asr),
-                        RemainingTimeLabel(
+                        LabelLabelTime(
+                          label: 'İKİNDİ :',
+                          time: prayertimeList[todayIndex].asr,
+                        ),
+                        LabelRemainingTime(
                             isVisible: isVisible[4],
                             label: 'Akşama kalan ',
                             remainingTime: remaining),
-                        TimeLabel(
-                            label: 'AKŞAM :', time: prayertimeList[todayIndex].maghrib),
-                        RemainingTimeLabel(
+                        LabelLabelTime(
+                          label: 'AKŞAM :',
+                          time: prayertimeList[todayIndex].maghrib,
+                        ),
+                        LabelRemainingTime(
                             isVisible: isVisible[5],
                             label: 'Yatsıya kalan ',
                             remainingTime: remaining),
-                        TimeLabel(
-                            label: 'YATSI :', time: prayertimeList[todayIndex].isha),
+                        LabelLabelTime(
+                          label: 'YATSI :',
+                          time: prayertimeList[todayIndex].isha,
+                        ),
                       ],
                     ),
                   ),

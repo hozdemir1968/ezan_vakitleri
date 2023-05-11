@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class RemainingTimeLabel extends StatelessWidget {
-  const RemainingTimeLabel({
+class LabelRemainingTime extends StatelessWidget {
+  const LabelRemainingTime({
     super.key,
     required this.isVisible,
     required this.label,
