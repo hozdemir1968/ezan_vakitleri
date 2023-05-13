@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:ezan_vakitleri/models/prayertime.dart';
+import 'package:ezan_vakitleri/models/time_model.dart';
 import 'package:ezan_vakitleri/services/db_services.dart';
 import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
@@ -18,9 +19,11 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final box = GetStorage();
-  var apiServices = ApiServices();
-  var dbServices = DbServices();
-  var services = Services();
+  final apiServices = ApiServices();
+  final dbServices = DbServices();
+  final services = Services();
+  final timeModelStr = TimeModelStr();
+  final timeModelInt = TimeModelInt();
   Timer? timer;
   List<PrayerTime> prayertimeList = [];
   int todayIndex = 0;
@@ -28,12 +31,11 @@ class _HomePageState extends State<HomePage> {
   String townName = '';
   String savedDay = '';
   List<bool> isVisible = [false, false, false, false, false, false];
-  String remaining = '';
+  String remainingTime = '';
   bool isLoading = false;
 
   @override
   void initState() {
-    print('initstate run');
     super.initState();
     if (box.read('townId') != null) {
       townId = box.read('townId');
@@ -55,7 +57,6 @@ class _HomePageState extends State<HomePage> {
   }
 
   void getApiData() async {
-    print('getapidata run');
     setState(() {
       isLoading = true;
     });
@@ -63,6 +64,7 @@ class _HomePageState extends State<HomePage> {
     await services.saveLocalData(prayertimeList);
     box.write('savedDay', DateTime.now().toString().substring(0, 10));
     findTodayIndex();
+    setTimeModel();
     findRemainingTime();
     setState(() {
       isLoading = false;
@@ -70,20 +72,41 @@ class _HomePageState extends State<HomePage> {
   }
 
   void getLocalData() async {
-    print('getlocaldata run');
     setState(() {
       isLoading = true;
     });
     prayertimeList = await services.getLocalData();
     findTodayIndex();
+    setTimeModel();
     findRemainingTime();
     setState(() {
       isLoading = false;
     });
   }
 
+  void setTimeModel() {
+    timeModelStr.time0 = prayertimeList[todayIndex].fajr.toString();
+    timeModelStr.time1 = prayertimeList[todayIndex].sunrise.toString();
+    timeModelStr.time2 = prayertimeList[todayIndex].dhuhr.toString();
+    timeModelStr.time3 = prayertimeList[todayIndex].asr.toString();
+    timeModelStr.time4 = prayertimeList[todayIndex].maghrib.toString();
+    timeModelStr.time5 = prayertimeList[todayIndex].isha.toString();
+
+    timeModelInt.time0 = int.parse(timeModelStr.time0!.substring(0, 2)) * 60 +
+        int.parse(timeModelStr.time0!.substring(3, 5));
+    timeModelInt.time1 = int.parse(timeModelStr.time1!.substring(0, 2)) * 60 +
+        int.parse(timeModelStr.time1!.substring(3, 5));
+    timeModelInt.time2 = int.parse(timeModelStr.time2!.substring(0, 2)) * 60 +
+        int.parse(timeModelStr.time2!.substring(3, 5));
+    timeModelInt.time3 = int.parse(timeModelStr.time3!.substring(0, 2)) * 60 +
+        int.parse(timeModelStr.time3!.substring(3, 5));
+    timeModelInt.time4 = int.parse(timeModelStr.time4!.substring(0, 2)) * 60 +
+        int.parse(timeModelStr.time4!.substring(3, 5));
+    timeModelInt.time5 = int.parse(timeModelStr.time5!.substring(0, 2)) * 60 +
+        int.parse(timeModelStr.time5!.substring(3, 5));
+  }
+
   void initTimer() {
-    print('inittimer run');
     if (timer != null && timer!.isActive) return;
     timer = Timer.periodic(const Duration(seconds: 10), (timer) {
       checkToday();
@@ -100,18 +123,13 @@ class _HomePageState extends State<HomePage> {
   }
 
   void checkToday() {
-    print('checktoday run');
-    String dt1 = savedDay;
-    String dt2 = DateTime.now().toString().substring(0, 10);
-    if (dt1 == dt2) {
-      debugPrint('eşit');
-    } else {
+    savedDay = box.read('savedDay');
+    if (savedDay != DateTime.now().toString().substring(0, 10)) {
       getApiData();
     }
   }
 
   void findTodayIndex() {
-    print('findtodayindex run');
     bool isDayIndex = true;
     String dt1 = DateTime.now().toString().substring(0, 10);
     String dt2 = '';
@@ -128,60 +146,43 @@ class _HomePageState extends State<HomePage> {
   }
 
   void findRemainingTime() {
-    String timeNow = DateTime.now().toString().substring(11, 16);
-    String time0 = prayertimeList[todayIndex].fajr.toString();
-    String time1 = prayertimeList[todayIndex].sunrise.toString();
-    String time2 = prayertimeList[todayIndex].dhuhr.toString();
-    String time3 = prayertimeList[todayIndex].asr.toString();
-    String time4 = prayertimeList[todayIndex].maghrib.toString();
-    String time5 = prayertimeList[todayIndex].isha.toString();
-    int timeNowInt =
-        int.parse(timeNow.substring(0, 2)) * 60 + int.parse(timeNow.substring(3, 5));
-    int time0Int =
-        int.parse(time0.substring(0, 2)) * 60 + int.parse(time0.substring(3, 5));
-    int time1Int =
-        int.parse(time1.substring(0, 2)) * 60 + int.parse(time1.substring(3, 5));
-    int time2Int =
-        int.parse(time2.substring(0, 2)) * 60 + int.parse(time2.substring(3, 5));
-    int time3Int =
-        int.parse(time3.substring(0, 2)) * 60 + int.parse(time3.substring(3, 5));
-    int time4Int =
-        int.parse(time4.substring(0, 2)) * 60 + int.parse(time4.substring(3, 5));
-    int time5Int =
-        int.parse(time5.substring(0, 2)) * 60 + int.parse(time5.substring(3, 5));
-    if (timeNowInt > time5Int || timeNowInt < time0Int) {
+    String timeNowStr = DateTime.now().toString().substring(11, 16);
+    int timeNowInt = int.parse(timeNowStr.substring(0, 2)) * 60 +
+        int.parse(timeNowStr.substring(3, 5));
+
+    if (timeNowInt > timeModelInt.time5! || timeNowInt < timeModelInt.time0!) {
       isVisible = [true, false, false, false, false, false];
-      if (timeNowInt > time5Int) {
-        remaining = services.calcHoursMinutes((1440 - timeNowInt) + time0Int);
+      if (timeNowInt > timeModelInt.time5!) {
+        remainingTime =
+            services.calcHoursMinutes((1440 - timeNowInt) + timeModelInt.time0!);
       } else {
-        remaining = services.calcHoursMinutes(time0Int - timeNowInt);
+        remainingTime = services.calcHoursMinutes(timeModelInt.time0! - timeNowInt);
       }
     }
-    if (timeNowInt > time0Int && timeNowInt < time1Int) {
+    if (timeNowInt > timeModelInt.time0! && timeNowInt < timeModelInt.time1!) {
       isVisible = [false, true, false, false, false, false];
-      remaining = services.calcHoursMinutes(time1Int - timeNowInt);
+      remainingTime = services.calcHoursMinutes(timeModelInt.time1! - timeNowInt);
     }
-    if (timeNowInt > time1Int && timeNowInt < time2Int) {
+    if (timeNowInt > timeModelInt.time1! && timeNowInt < timeModelInt.time2!) {
       isVisible = [false, false, true, false, false, false];
-      remaining = services.calcHoursMinutes(time2Int - timeNowInt);
+      remainingTime = services.calcHoursMinutes(timeModelInt.time2! - timeNowInt);
     }
-    if (timeNowInt > time2Int && timeNowInt < time3Int) {
+    if (timeNowInt > timeModelInt.time2! && timeNowInt < timeModelInt.time3!) {
       isVisible = [false, false, false, true, false, false];
-      remaining = services.calcHoursMinutes(time3Int - timeNowInt);
+      remainingTime = services.calcHoursMinutes(timeModelInt.time3! - timeNowInt);
     }
-    if (timeNowInt > time3Int && timeNowInt < time4Int) {
+    if (timeNowInt > timeModelInt.time3! && timeNowInt < timeModelInt.time4!) {
       isVisible = [false, false, false, false, true, false];
-      remaining = services.calcHoursMinutes(time4Int - timeNowInt);
+      remainingTime = services.calcHoursMinutes(timeModelInt.time4! - timeNowInt);
     }
-    if (timeNowInt > time4Int && timeNowInt < time5Int) {
+    if (timeNowInt > timeModelInt.time4! && timeNowInt < timeModelInt.time5!) {
       isVisible = [false, false, false, false, false, true];
-      remaining = services.calcHoursMinutes(time5Int - timeNowInt);
+      remainingTime = services.calcHoursMinutes(timeModelInt.time5! - timeNowInt);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    print('build run');
     return Scaffold(
       appBar: AppBar(
         title: const Text('Ezan Vakitleri'),
@@ -224,7 +225,7 @@ class _HomePageState extends State<HomePage> {
                         LabelRemainingTime(
                             isVisible: isVisible[0],
                             label: 'İmsaka kalan ',
-                            remainingTime: remaining),
+                            remainingTime: remainingTime),
                         LabelLabelTime(
                           label: 'İMSAK :',
                           time: prayertimeList[todayIndex].fajr,
@@ -232,7 +233,7 @@ class _HomePageState extends State<HomePage> {
                         LabelRemainingTime(
                             isVisible: isVisible[1],
                             label: 'Güneşe kalan ',
-                            remainingTime: remaining),
+                            remainingTime: remainingTime),
                         LabelLabelTime(
                           label: 'GÜNEŞ :',
                           time: prayertimeList[todayIndex].sunrise,
@@ -240,7 +241,7 @@ class _HomePageState extends State<HomePage> {
                         LabelRemainingTime(
                             isVisible: isVisible[2],
                             label: 'Öğlene kalan ',
-                            remainingTime: remaining),
+                            remainingTime: remainingTime),
                         LabelLabelTime(
                           label: 'ÖĞLEN :',
                           time: prayertimeList[todayIndex].dhuhr,
@@ -248,7 +249,7 @@ class _HomePageState extends State<HomePage> {
                         LabelRemainingTime(
                             isVisible: isVisible[3],
                             label: 'İkindine kalan ',
-                            remainingTime: remaining),
+                            remainingTime: remainingTime),
                         LabelLabelTime(
                           label: 'İKİNDİ :',
                           time: prayertimeList[todayIndex].asr,
@@ -256,7 +257,7 @@ class _HomePageState extends State<HomePage> {
                         LabelRemainingTime(
                             isVisible: isVisible[4],
                             label: 'Akşama kalan ',
-                            remainingTime: remaining),
+                            remainingTime: remainingTime),
                         LabelLabelTime(
                           label: 'AKŞAM :',
                           time: prayertimeList[todayIndex].maghrib,
@@ -264,7 +265,7 @@ class _HomePageState extends State<HomePage> {
                         LabelRemainingTime(
                             isVisible: isVisible[5],
                             label: 'Yatsıya kalan ',
-                            remainingTime: remaining),
+                            remainingTime: remainingTime),
                         LabelLabelTime(
                           label: 'YATSI :',
                           time: prayertimeList[todayIndex].isha,

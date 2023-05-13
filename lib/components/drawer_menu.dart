@@ -32,6 +32,7 @@ class _DrawerMenuState extends ConsumerState<DrawerMenu> {
                     title: const Text("ANASAYFA"),
                     trailing: const Icon(Icons.keyboard_arrow_right),
                     onTap: () {
+                      //Navigator.pop(context);
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => const HomePage()),
