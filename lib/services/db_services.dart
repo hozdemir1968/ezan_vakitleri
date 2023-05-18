@@ -4,7 +4,7 @@ import '../db_helper/repository.dart';
 class DbServices {
   final Repository _repository = Repository();
 
-  saveData(PrayerTime prayertime) async {
+  saveData(Prayertime prayertime) async {
     return await _repository.insertData('prayertimes', prayertime.toMap());
   }
 
@@ -12,7 +12,7 @@ class DbServices {
     return await _repository.readAllData('prayertimes');
   }
 
-  updateData(PrayerTime prayertime) async {
+  updateData(Prayertime prayertime) async {
     return await _repository.updateData('prayertimes', prayertime.toMap());
   }
 

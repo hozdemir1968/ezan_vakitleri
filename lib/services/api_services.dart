@@ -43,14 +43,14 @@ class ApiServices {
     }
   }
 
-  Future<List<PrayerTime>> getPrayerTimes(int townId) async {
+  Future<List<Prayertime>> getPrayerTimes(int townId) async {
     final response = await http.post(
       Uri.parse(Statics.prayertimeUrl),
       body: json.encode({'townId': townId.toString()}),
     );
     if (response.statusCode == 200) {
       final List result = json.decode(utf8.decode(response.bodyBytes));
-      return result.map((e) => PrayerTime.fromJson(e)).toList();
+      return result.map((e) => Prayertime.fromJson(e)).toList();
     } else {
       throw ('Bir sorun oluştu ${response.statusCode}');
     }

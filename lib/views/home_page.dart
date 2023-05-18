@@ -25,7 +25,7 @@ class _HomePageState extends State<HomePage> {
   final timeModelStr = TimeModelStr();
   final timeModelInt = TimeModelInt();
   Timer? timer;
-  List<PrayerTime> prayertimeList = [];
+  List<Prayertime> prayertimeList = [];
   int todayIndex = 0;
   int townId = 0;
   String townName = '';
@@ -91,7 +91,6 @@ class _HomePageState extends State<HomePage> {
     timeModelStr.time3 = prayertimeList[todayIndex].asr.toString();
     timeModelStr.time4 = prayertimeList[todayIndex].maghrib.toString();
     timeModelStr.time5 = prayertimeList[todayIndex].isha.toString();
-
     timeModelInt.time0 = int.parse(timeModelStr.time0!.substring(0, 2)) * 60 +
         int.parse(timeModelStr.time0!.substring(3, 5));
     timeModelInt.time1 = int.parse(timeModelStr.time1!.substring(0, 2)) * 60 +

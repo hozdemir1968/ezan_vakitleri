@@ -1,4 +1,4 @@
-class PrayerTime {
+class Prayertime {
   int? id;
   String? shapeMoonUrl;
   String? fajr;
@@ -20,7 +20,7 @@ class PrayerTime {
   String? gregorianDateLongIso8601;
   int? greenwichMeanTimeZone;
 
-  PrayerTime({
+  Prayertime({
     this.id,
     this.shapeMoonUrl,
     this.fajr,
@@ -43,7 +43,7 @@ class PrayerTime {
     this.greenwichMeanTimeZone,
   });
 
-  PrayerTime.fromJson(Map<String, dynamic> json) {
+  Prayertime.fromJson(Map<String, dynamic> json) {
     shapeMoonUrl = json['shapeMoonUrl'];
     fajr = json['fajr'];
     sunrise = json['sunrise'];
@@ -89,7 +89,7 @@ class PrayerTime {
     return data;
   }
 
-  PrayerTime.fromMap(Map<String, dynamic> map) {
+  Prayertime.fromMap(Map<String, dynamic> map) {
     shapeMoonUrl = map['shapeMoonUrl'];
     fajr = map['fajr'];
     sunrise = map['sunrise'];

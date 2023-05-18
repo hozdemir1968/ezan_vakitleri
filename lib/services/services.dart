@@ -4,7 +4,7 @@ import 'db_services.dart';
 class Services {
   Future saveLocalData(List prayertimeList) async {
     DbServices().deleteAllData();
-    var prayertime = PrayerTime();
+    var prayertime = Prayertime();
     for (int i = 0; i < prayertimeList.length; i++) {
       prayertime.asr = prayertimeList[i].asr;
       prayertime.astronomicalSunrise = prayertimeList[i].astronomicalSunrise;
@@ -29,12 +29,12 @@ class Services {
     }
   }
 
-  Future<List<PrayerTime>> getLocalData() async {
-    List<PrayerTime> prayertimeList = [];
+  Future<List<Prayertime>> getLocalData() async {
+    List<Prayertime> prayertimeList = [];
     var prayertimes = await DbServices().readAllData();
     int i = 0;
     prayertimes.forEach((prayertime) {
-      var prayertimeModel = PrayerTime(
+      var prayertimeModel = Prayertime(
         id: i++,
         asr: prayertime['asr'],
         astronomicalSunrise: prayertime['astronomicalSunrise'],

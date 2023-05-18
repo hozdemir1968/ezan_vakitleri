@@ -17,7 +17,28 @@ class DbConnection {
 
   Future<void> _createDatabase(Database database, int version) async {
     String sql =
-        "CREATE TABLE prayertimes (id INTEGER PRIMARY KEY AUTOINCREMENT,shapeMoonUrl TEXT, fajr TEXT, sunrise TEXT, dhuhr TEXT, asr TEXT, maghrib TEXT, isha TEXT, astronomicalSunset TEXT, astronomicalSunrise TEXT, hijriDateShort TEXT, hijriDateShortIso8601 TEXT, hijriDateLong TEXT, hijriDateLongIso8601 TEXT, qiblaTime TEXT, gregorianDateShort TEXT, gregorianDateShortIso8601 TEXT, gregorianDateLong TEXT, gregorianDateLongIso8601 TEXT, greenwichMeanTimeZone INTEGER)";
+        """CREATE TABLE prayertimes (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          shapeMoonUrl TEXT,
+          fajr TEXT,
+          sunrise TEXT,
+          dhuhr TEXT,
+          asr TEXT,
+          maghrib TEXT,
+          isha TEXT,
+          astronomicalSunset TEXT,
+          astronomicalSunrise TEXT,
+          hijriDateShort TEXT,
+          hijriDateShortIso8601 TEXT,
+          hijriDateLong TEXT,
+          hijriDateLongIso8601 TEXT,
+          qiblaTime TEXT,
+          gregorianDateShort TEXT,
+          gregorianDateShortIso8601 TEXT,
+          gregorianDateLong TEXT,
+          gregorianDateLongIso8601 TEXT,
+          greenwichMeanTimeZone INTEGER
+        )""";
     await database.execute(sql);
   }
 }
