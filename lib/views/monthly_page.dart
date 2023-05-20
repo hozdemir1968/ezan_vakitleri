@@ -6,6 +6,11 @@ class MonthlyPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    MainAxisAlignment thisAlignment;
+    size.width < 750
+        ? thisAlignment = MainAxisAlignment.spaceBetween
+        : thisAlignment = MainAxisAlignment.spaceEvenly;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Aylık Ezan Vakitleri'),
@@ -15,9 +20,11 @@ class MonthlyPage extends StatelessWidget {
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             return ListView.builder(
-                itemCount: snapshot.data!.length,
-                itemBuilder: (context, index) {
-                  return Column(
+              itemCount: snapshot.data!.length,
+              itemBuilder: (context, index) {
+                return Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Column(
                     children: [
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -28,9 +35,9 @@ class MonthlyPage extends StatelessWidget {
                         ],
                       ),
                       const SizedBox(height: 8),
-                      const Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
+                      Row(
+                        mainAxisAlignment: thisAlignment,
+                        children: const [
                           Text('İmsak', style: TextStyle(fontSize: 16)),
                           Text('Güneş', style: TextStyle(fontSize: 16)),
                           Text('Öğlen', style: TextStyle(fontSize: 16)),
@@ -41,26 +48,28 @@ class MonthlyPage extends StatelessWidget {
                       ),
                       const SizedBox(height: 5),
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        mainAxisAlignment: thisAlignment,
                         children: [
                           Text(snapshot.data![index].fajr.toString(),
-                              style: const TextStyle(fontSize: 16)),
+                              style: const TextStyle(fontSize: 18)),
                           Text(snapshot.data![index].sunrise.toString(),
-                              style: const TextStyle(fontSize: 16)),
+                              style: const TextStyle(fontSize: 18)),
                           Text(snapshot.data![index].dhuhr.toString(),
-                              style: const TextStyle(fontSize: 16)),
+                              style: const TextStyle(fontSize: 18)),
                           Text(snapshot.data![index].asr.toString(),
-                              style: const TextStyle(fontSize: 16)),
+                              style: const TextStyle(fontSize: 18)),
                           Text(snapshot.data![index].maghrib.toString(),
-                              style: const TextStyle(fontSize: 16)),
+                              style: const TextStyle(fontSize: 18)),
                           Text(snapshot.data![index].isha.toString(),
-                              style: const TextStyle(fontSize: 16)),
+                              style: const TextStyle(fontSize: 18)),
                         ],
                       ),
-                      const SizedBox(height: 30),
+                      const SizedBox(height: 10),
                     ],
-                  );
-                });
+                  ),
+                );
+              },
+            );
           } else if (snapshot.hasError) {
             return Text('${snapshot.error}');
           }

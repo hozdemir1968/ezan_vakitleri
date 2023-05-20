@@ -182,6 +182,8 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Ezan Vakitleri'),
@@ -189,92 +191,107 @@ class _HomePageState extends State<HomePage> {
       drawer: const DrawerMenu(),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
-          : Column(
-              children: [
-                Expanded(
-                  flex: 2,
-                  child: Container(
-                    width: double.infinity,
-                    margin: const EdgeInsets.all(10.0),
-                    padding: const EdgeInsets.all(2.0),
-                    decoration: BoxDecoration(border: Border.all(color: Colors.black)),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Text(townName, style: const TextStyle(fontSize: 18)),
-                        Text(prayertimeList[todayIndex].gregorianDateLong.toString(),
-                            style: const TextStyle(fontSize: 18)),
-                        Text(prayertimeList[todayIndex].hijriDateLong.toString(),
-                            style: const TextStyle(fontSize: 18)),
-                      ],
+          : size.height > 800
+              ? Column(
+                  children: [
+                    Expanded(
+                      flex: 2,
+                      child: topData(),
                     ),
-                  ),
-                ),
-                Expanded(
-                  flex: 5,
-                  child: Container(
-                    width: double.infinity,
-                    margin: const EdgeInsets.all(10.0),
-                    padding: const EdgeInsets.all(2.0),
-                    decoration: BoxDecoration(border: Border.all(color: Colors.black)),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        LabelRemainingTime(
-                            isVisible: isVisible[0],
-                            label: 'İmsaka kalan ',
-                            remainingTime: remainingTime),
-                        LabelLabelTime(
-                          label: 'İMSAK :',
-                          time: prayertimeList[todayIndex].fajr,
-                        ),
-                        LabelRemainingTime(
-                            isVisible: isVisible[1],
-                            label: 'Güneşe kalan ',
-                            remainingTime: remainingTime),
-                        LabelLabelTime(
-                          label: 'GÜNEŞ :',
-                          time: prayertimeList[todayIndex].sunrise,
-                        ),
-                        LabelRemainingTime(
-                            isVisible: isVisible[2],
-                            label: 'Öğlene kalan ',
-                            remainingTime: remainingTime),
-                        LabelLabelTime(
-                          label: 'ÖĞLEN :',
-                          time: prayertimeList[todayIndex].dhuhr,
-                        ),
-                        LabelRemainingTime(
-                            isVisible: isVisible[3],
-                            label: 'İkindine kalan ',
-                            remainingTime: remainingTime),
-                        LabelLabelTime(
-                          label: 'İKİNDİ :',
-                          time: prayertimeList[todayIndex].asr,
-                        ),
-                        LabelRemainingTime(
-                            isVisible: isVisible[4],
-                            label: 'Akşama kalan ',
-                            remainingTime: remainingTime),
-                        LabelLabelTime(
-                          label: 'AKŞAM :',
-                          time: prayertimeList[todayIndex].maghrib,
-                        ),
-                        LabelRemainingTime(
-                            isVisible: isVisible[5],
-                            label: 'Yatsıya kalan ',
-                            remainingTime: remainingTime),
-                        LabelLabelTime(
-                          label: 'YATSI :',
-                          time: prayertimeList[todayIndex].isha,
-                        ),
-                      ],
+                    Expanded(
+                      flex: 5,
+                      child: bottomData(),
                     ),
-                  ),
+                  ],
+                )
+              : ListView(
+                  children: [
+                    topData(),
+                    bottomData(),
+                  ],
                 ),
-              ],
-            ),
+    );
+  }
+
+  Container topData() {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.all(10.0),
+      padding: const EdgeInsets.all(2.0),
+      decoration: BoxDecoration(border: Border.all(color: Colors.black)),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text(townName, style: const TextStyle(fontSize: 18)),
+          Text(prayertimeList[todayIndex].gregorianDateLong.toString(),
+              style: const TextStyle(fontSize: 18)),
+          Text(prayertimeList[todayIndex].hijriDateLong.toString(),
+              style: const TextStyle(fontSize: 18)),
+        ],
+      ),
+    );
+  }
+
+  Container bottomData() {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.all(10.0),
+      padding: const EdgeInsets.all(2.0),
+      decoration: BoxDecoration(border: Border.all(color: Colors.black)),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          LabelRemainingTime(
+              isVisible: isVisible[0],
+              label: 'İmsaka kalan ',
+              remainingTime: remainingTime),
+          LabelLabelTime(
+            label: 'İMSAK :',
+            time: prayertimeList[todayIndex].fajr,
+          ),
+          LabelRemainingTime(
+              isVisible: isVisible[1],
+              label: 'Güneşe kalan ',
+              remainingTime: remainingTime),
+          LabelLabelTime(
+            label: 'GÜNEŞ :',
+            time: prayertimeList[todayIndex].sunrise,
+          ),
+          LabelRemainingTime(
+              isVisible: isVisible[2],
+              label: 'Öğlene kalan ',
+              remainingTime: remainingTime),
+          LabelLabelTime(
+            label: 'ÖĞLEN :',
+            time: prayertimeList[todayIndex].dhuhr,
+          ),
+          LabelRemainingTime(
+              isVisible: isVisible[3],
+              label: 'İkindine kalan ',
+              remainingTime: remainingTime),
+          LabelLabelTime(
+            label: 'İKİNDİ :',
+            time: prayertimeList[todayIndex].asr,
+          ),
+          LabelRemainingTime(
+              isVisible: isVisible[4],
+              label: 'Akşama kalan ',
+              remainingTime: remainingTime),
+          LabelLabelTime(
+            label: 'AKŞAM :',
+            time: prayertimeList[todayIndex].maghrib,
+          ),
+          LabelRemainingTime(
+              isVisible: isVisible[5],
+              label: 'Yatsıya kalan ',
+              remainingTime: remainingTime),
+          LabelLabelTime(
+            label: 'YATSI :',
+            time: prayertimeList[todayIndex].isha,
+          ),
+        ],
+      ),
     );
   }
 }
