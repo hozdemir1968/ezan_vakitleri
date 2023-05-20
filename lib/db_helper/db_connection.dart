@@ -1,4 +1,3 @@
-import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 import '../statics/statics.dart';
@@ -6,7 +5,7 @@ import '../statics/statics.dart';
 class DbConnection {
   Future<Database> setDatabase() async {
     var directory = await getApplicationDocumentsDirectory();
-    var path = join(directory.path, Statics.tableName);
+    var path = '${directory.path}/${Statics.tableName}';
     var database = await openDatabase(
       path,
       version: 1,
@@ -16,8 +15,7 @@ class DbConnection {
   }
 
   Future<void> _createDatabase(Database database, int version) async {
-    String sql =
-        """CREATE TABLE prayertimes (
+    String sql = """CREATE TABLE prayertimes (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           shapeMoonUrl TEXT,
           fajr TEXT,
