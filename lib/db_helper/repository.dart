@@ -43,4 +43,8 @@ class Repository {
     var connection = await database;
     return await connection?.rawDelete("delete from $table");
   }
+
+  closeDb() {
+    _database!.close();
+  }
 }

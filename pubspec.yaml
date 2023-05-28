@@ -38,7 +38,7 @@ dependencies:
   get_storage: ^2.1.1
   flutter_riverpod: ^2.3.6
   flutter_switch: ^0.3.2
-  http: ^0.13.5
+  http: ^1.0.0
   sqflite: ^2.2.8
   path_provider: ^2.0.14
 

@@ -33,7 +33,10 @@ class _SelectStateState extends State<SelectState> {
                 itemCount: snapshot.data!.length,
                 itemBuilder: (context, index) {
                   return ListTile(
-                    title: Text(snapshot.data![index].name.toString()),
+                    title: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(snapshot.data![index].name.toString()),
+                    ),
                     onTap: () {
                       box.write('stateId', snapshot.data![index].id);
                       Navigator.push(context,

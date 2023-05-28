@@ -56,6 +56,7 @@ class _DrawerMenuState extends ConsumerState<DrawerMenu> {
                     title: const Text("KONUM SEÇ"),
                     trailing: const Icon(Icons.keyboard_arrow_right),
                     onTap: () {
+                      Navigator.pop(context);
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => const SelectCountry()),

@@ -191,7 +191,7 @@ class _HomePageState extends State<HomePage> {
       drawer: const DrawerMenu(),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
-          : size.height > 800
+          : size.height > 750
               ? Column(
                   children: [
                     Expanded(
