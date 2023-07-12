@@ -1,6 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get_storage/get_storage.dart';
 
+final darkModeProvider = StateNotifierProvider<DarkModeNotifier, bool>(
+  (ref) => DarkModeNotifier(),
+);
+
 class DarkModeNotifier extends StateNotifier<bool> {
   final box = GetStorage();
 
@@ -18,7 +22,3 @@ class DarkModeNotifier extends StateNotifier<bool> {
     box.write('isDarkMode', state);
   }
 }
-
-final darkModeProvider = StateNotifierProvider<DarkModeNotifier, bool>(
-  (ref) => DarkModeNotifier(),
-);

@@ -1,8 +1,8 @@
 import 'package:ezan_vakitleri/models/prayertime.dart';
-import '../db_helper/repository.dart';
+import 'db_repository.dart';
 
-class DbServices {
-  final Repository _repository = Repository();
+class DbController {
+  final DbRepository _repository = DbRepository();
 
   saveData(Prayertime prayertime) async {
     return await _repository.insertData('prayertimes', prayertime.toMap());

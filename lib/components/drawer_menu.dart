@@ -1,20 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../providers/dark_mode_provider.dart';
+import 'package:get_storage/get_storage.dart';
+import '../services/dark_light_service.dart';
 import '../views/home_page.dart';
 import '../views/monthly_page.dart';
-import '../views/select_country.dart';
 
-class DrawerMenu extends ConsumerStatefulWidget {
+class DrawerMenu extends ConsumerWidget {
   const DrawerMenu({super.key});
-  @override
-  ConsumerState<ConsumerStatefulWidget> createState() => _DrawerMenuState();
-}
 
-class _DrawerMenuState extends ConsumerState<DrawerMenu> {
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     var isDarkMode = ref.watch(darkModeProvider);
+    final box = GetStorage();
 
     return Scaffold(
       appBar: AppBar(
@@ -32,7 +30,7 @@ class _DrawerMenuState extends ConsumerState<DrawerMenu> {
                     title: const Text("ANASAYFA"),
                     trailing: const Icon(Icons.keyboard_arrow_right),
                     onTap: () {
-                      //Navigator.pop(context);
+                      Navigator.pop(context);
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => const HomePage()),
@@ -56,11 +54,8 @@ class _DrawerMenuState extends ConsumerState<DrawerMenu> {
                     title: const Text("KONUM SEÇ"),
                     trailing: const Icon(Icons.keyboard_arrow_right),
                     onTap: () {
-                      Navigator.pop(context);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const SelectCountry()),
-                      );
+                      box.erase();
+                      Phoenix.rebirth(context);
                     },
                   ),
                   ListTile(

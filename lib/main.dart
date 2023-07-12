@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get_storage/get_storage.dart';
-import 'providers/dark_mode_provider.dart';
+import 'services/dark_light_service.dart';
 import 'views/splash.dart';
 import 'themes/themes.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await GetStorage.init();
-  runApp(const ProviderScope(child: MyApp()));
+  runApp(ProviderScope(child: Phoenix(child: const MyApp())));
 }
 
 class MyApp extends ConsumerWidget {

@@ -1,5 +1,5 @@
+import 'package:ezan_vakitleri/services/storage_service.dart';
 import 'package:flutter/material.dart';
-import 'package:get_storage/get_storage.dart';
 import 'home_page.dart';
 import 'select_country.dart';
 
@@ -8,8 +8,8 @@ class Splash extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final box = GetStorage();
-
-    return (box.read('townId') == null) ? const SelectCountry() : const HomePage();
+    return (StorageService().readIntFromStorage('townId') == -1)
+        ? SelectCountry()
+        : const HomePage();
   }
 }

@@ -1,7 +1,7 @@
 import 'package:sqflite/sqflite.dart';
 import 'db_connection.dart';
 
-class Repository {
+class DbRepository {
   final DbConnection _dbConnection = DbConnection();
   Database? _database;
 
@@ -41,7 +41,7 @@ class Repository {
 
   deleteAllData(table) async {
     var connection = await database;
-    return await connection?.rawDelete("delete from $table");
+    return await connection?.delete("$table");
   }
 
   closeDb() {

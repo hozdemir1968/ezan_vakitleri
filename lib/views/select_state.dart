@@ -1,54 +1,41 @@
-import 'package:ezan_vakitleri/services/api_services.dart';
 import 'package:ezan_vakitleri/views/select_town.dart';
 import 'package:flutter/material.dart';
-import 'package:get_storage/get_storage.dart';
-import '../models/mystate.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../providers/providers.dart';
 
-class SelectState extends StatefulWidget {
-  const SelectState({super.key});
-
-  @override
-  State<SelectState> createState() => _SelectStateState();
-}
-
-class _SelectStateState extends State<SelectState> {
-  var apiServices = ApiServices();
-
-  late Future<MyState> futureCountry;
-  final box = GetStorage();
+class SelectState extends ConsumerWidget {
+  final int countryId;
+  const SelectState({super.key, required this.countryId});
 
   @override
-  Widget build(BuildContext context) {
-    int id = box.read('countryId');
+  Widget build(BuildContext context, WidgetRef ref) {
+    final stateData = ref.watch(getStatesProvider(countryId));
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('ŞEHİR SEÇ'),
       ),
-      body: FutureBuilder<List<MyState>>(
-        future: apiServices.getStates(id),
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            return ListView.builder(
-                itemCount: snapshot.data!.length,
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    title: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(snapshot.data![index].name.toString()),
-                    ),
-                    onTap: () {
-                      box.write('stateId', snapshot.data![index].id);
-                      Navigator.push(context,
-                          MaterialPageRoute(builder: (context) => const SelectTown()));
-                    },
-                  );
-                });
-          } else if (snapshot.hasError) {
-            return Text('${snapshot.error}');
-          }
-          return const Center(child: CircularProgressIndicator());
+      body: stateData.when(
+        data: (data) {
+          return ListView.builder(
+            itemCount: data.length,
+            itemBuilder: (context, index) {
+              return ListTile(
+                title: Text(data[index].name.toString()),
+                onTap: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => SelectTown(
+                                stateId: data[index].id!,
+                              )));
+                },
+              );
+            },
+          );
         },
+        error: (error, s) => Center(child: Text(error.toString())),
+        loading: () => const Center(child: CircularProgressIndicator()),
       ),
     );
   }

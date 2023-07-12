@@ -1,14 +1,12 @@
 import 'dart:async';
-import 'package:ezan_vakitleri/models/prayertime.dart';
-import 'package:ezan_vakitleri/models/time_model.dart';
-import 'package:ezan_vakitleri/services/db_services.dart';
 import 'package:flutter/material.dart';
-import 'package:get_storage/get_storage.dart';
 import '../components/drawer_menu.dart';
 import '../components/label_label_time.dart';
 import '../components/label_remaining_time.dart';
-import '../services/api_services.dart';
-import '../services/services.dart';
+import '../models/prayertime.dart';
+import '../models/time_model.dart';
+import '../services/api_service.dart';
+import '../services/storage_service.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -18,10 +16,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final box = GetStorage();
-  final apiServices = ApiServices();
-  final dbServices = DbServices();
-  final services = Services();
+  final apiService = ApiService();
+  final storageService = StorageService();
   final timeModelStr = TimeModelStr();
   final timeModelInt = TimeModelInt();
   Timer? timer;
@@ -37,82 +33,15 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    if (box.read('townId') != null) {
-      townId = box.read('townId');
-    }
-    if (box.read('townName') != null) {
-      townName = box.read('townName');
-    }
-    if (box.read('savedDay') != null) {
-      savedDay = box.read('savedDay');
-      if (savedDay == DateTime.now().toString().substring(0, 10)) {
-        getLocalData();
-      } else {
-        getApiData();
-      }
+    townId = storageService.readIntFromStorage('townId');
+    townName = storageService.readStrFromStorage('townName');
+    savedDay = storageService.readStrFromStorage('savedDay');
+    if (savedDay == DateTime.now().toString().substring(0, 10)) {
+      getData("LOCAL");
     } else {
-      getApiData();
+      getData("API");
     }
     initTimer();
-  }
-
-  void getApiData() async {
-    setState(() {
-      isLoading = true;
-    });
-    prayertimeList = await apiServices.getPrayerTimes(townId);
-    await services.saveLocalData(prayertimeList);
-    box.write('savedDay', DateTime.now().toString().substring(0, 10));
-    findTodayIndex();
-    setTimeModel();
-    findRemainingTime();
-    setState(() {
-      isLoading = false;
-    });
-  }
-
-  void getLocalData() async {
-    setState(() {
-      isLoading = true;
-    });
-    prayertimeList = await services.getLocalData();
-    findTodayIndex();
-    setTimeModel();
-    findRemainingTime();
-    setState(() {
-      isLoading = false;
-    });
-  }
-
-  void setTimeModel() {
-    timeModelStr.time0 = prayertimeList[todayIndex].fajr.toString();
-    timeModelStr.time1 = prayertimeList[todayIndex].sunrise.toString();
-    timeModelStr.time2 = prayertimeList[todayIndex].dhuhr.toString();
-    timeModelStr.time3 = prayertimeList[todayIndex].asr.toString();
-    timeModelStr.time4 = prayertimeList[todayIndex].maghrib.toString();
-    timeModelStr.time5 = prayertimeList[todayIndex].isha.toString();
-    timeModelInt.time0 = int.parse(timeModelStr.time0!.substring(0, 2)) * 60 +
-        int.parse(timeModelStr.time0!.substring(3, 5));
-    timeModelInt.time1 = int.parse(timeModelStr.time1!.substring(0, 2)) * 60 +
-        int.parse(timeModelStr.time1!.substring(3, 5));
-    timeModelInt.time2 = int.parse(timeModelStr.time2!.substring(0, 2)) * 60 +
-        int.parse(timeModelStr.time2!.substring(3, 5));
-    timeModelInt.time3 = int.parse(timeModelStr.time3!.substring(0, 2)) * 60 +
-        int.parse(timeModelStr.time3!.substring(3, 5));
-    timeModelInt.time4 = int.parse(timeModelStr.time4!.substring(0, 2)) * 60 +
-        int.parse(timeModelStr.time4!.substring(3, 5));
-    timeModelInt.time5 = int.parse(timeModelStr.time5!.substring(0, 2)) * 60 +
-        int.parse(timeModelStr.time5!.substring(3, 5));
-  }
-
-  void initTimer() {
-    if (timer != null && timer!.isActive) return;
-    timer = Timer.periodic(const Duration(seconds: 10), (timer) {
-      checkToday();
-      findTodayIndex();
-      findRemainingTime();
-      setState(() {});
-    });
   }
 
   @override
@@ -121,10 +50,40 @@ class _HomePageState extends State<HomePage> {
     super.dispose();
   }
 
+  void initTimer() {
+    if (timer != null && timer!.isActive) return;
+    timer = Timer.periodic(const Duration(seconds: 10), (timer) {
+      checkToday();
+      findTodayIndex();
+      setState(() {});
+    });
+  }
+
+  void getData(String where) async {
+    setState(() {
+      isLoading = true;
+    });
+    if (where == "API") {
+      prayertimeList = await apiService.getPrayerTimes(townId);
+      await storageService.saveLocalData(prayertimeList);
+      storageService.writeToStorage(
+          'savedDay', DateTime.now().toString().substring(0, 10));
+    }
+    if (where == "LOCAL") {
+      prayertimeList = await storageService.getLocalData();
+    }
+    setTimeModel();
+    checkToday();
+    findTodayIndex();
+    setState(() {
+      isLoading = false;
+    });
+  }
+
   void checkToday() {
-    savedDay = box.read('savedDay');
+    savedDay = storageService.readStrFromStorage('savedDay');
     if (savedDay != DateTime.now().toString().substring(0, 10)) {
-      getApiData();
+      getData("API");
     }
   }
 
@@ -152,37 +111,81 @@ class _HomePageState extends State<HomePage> {
     if (timeNowInt > timeModelInt.time5! || timeNowInt < timeModelInt.time0!) {
       isVisible = [true, false, false, false, false, false];
       if (timeNowInt > timeModelInt.time5!) {
-        remainingTime =
-            services.calcHoursMinutes((1440 - timeNowInt) + timeModelInt.time0!);
+        remainingTime = calcHoursMinutes((1440 - timeNowInt) + timeModelInt.time0!);
       } else {
-        remainingTime = services.calcHoursMinutes(timeModelInt.time0! - timeNowInt);
+        remainingTime = calcHoursMinutes(timeModelInt.time0! - timeNowInt);
       }
     }
     if (timeNowInt > timeModelInt.time0! && timeNowInt < timeModelInt.time1!) {
       isVisible = [false, true, false, false, false, false];
-      remainingTime = services.calcHoursMinutes(timeModelInt.time1! - timeNowInt);
+      remainingTime = calcHoursMinutes(timeModelInt.time1! - timeNowInt);
     }
     if (timeNowInt > timeModelInt.time1! && timeNowInt < timeModelInt.time2!) {
       isVisible = [false, false, true, false, false, false];
-      remainingTime = services.calcHoursMinutes(timeModelInt.time2! - timeNowInt);
+      remainingTime = calcHoursMinutes(timeModelInt.time2! - timeNowInt);
     }
     if (timeNowInt > timeModelInt.time2! && timeNowInt < timeModelInt.time3!) {
       isVisible = [false, false, false, true, false, false];
-      remainingTime = services.calcHoursMinutes(timeModelInt.time3! - timeNowInt);
+      remainingTime = calcHoursMinutes(timeModelInt.time3! - timeNowInt);
     }
     if (timeNowInt > timeModelInt.time3! && timeNowInt < timeModelInt.time4!) {
       isVisible = [false, false, false, false, true, false];
-      remainingTime = services.calcHoursMinutes(timeModelInt.time4! - timeNowInt);
+      remainingTime = calcHoursMinutes(timeModelInt.time4! - timeNowInt);
     }
     if (timeNowInt > timeModelInt.time4! && timeNowInt < timeModelInt.time5!) {
       isVisible = [false, false, false, false, false, true];
-      remainingTime = services.calcHoursMinutes(timeModelInt.time5! - timeNowInt);
+      remainingTime = calcHoursMinutes(timeModelInt.time5! - timeNowInt);
     }
+  }
+
+  String calcHoursMinutes(int number) {
+    String sonuc = '';
+    int hours = 0;
+    int minutes = 0;
+    if (number > 60) {
+      hours = number ~/ 60;
+      minutes = number - (hours * 60);
+    } else {
+      hours = 0;
+      minutes = number;
+    }
+    if (hours > 0) {
+      if (minutes > 0) {
+        sonuc = '$hours saat $minutes dakika';
+      } else {
+        sonuc = '$hours saat';
+      }
+    } else {
+      sonuc = '$minutes dakika';
+    }
+    return sonuc;
+  }
+
+  void setTimeModel() {
+    timeModelStr.time0 = prayertimeList[todayIndex].fajr.toString();
+    timeModelStr.time1 = prayertimeList[todayIndex].sunrise.toString();
+    timeModelStr.time2 = prayertimeList[todayIndex].dhuhr.toString();
+    timeModelStr.time3 = prayertimeList[todayIndex].asr.toString();
+    timeModelStr.time4 = prayertimeList[todayIndex].maghrib.toString();
+    timeModelStr.time5 = prayertimeList[todayIndex].isha.toString();
+    timeModelInt.time0 = int.parse(timeModelStr.time0!.substring(0, 2)) * 60 +
+        int.parse(timeModelStr.time0!.substring(3, 5));
+    timeModelInt.time1 = int.parse(timeModelStr.time1!.substring(0, 2)) * 60 +
+        int.parse(timeModelStr.time1!.substring(3, 5));
+    timeModelInt.time2 = int.parse(timeModelStr.time2!.substring(0, 2)) * 60 +
+        int.parse(timeModelStr.time2!.substring(3, 5));
+    timeModelInt.time3 = int.parse(timeModelStr.time3!.substring(0, 2)) * 60 +
+        int.parse(timeModelStr.time3!.substring(3, 5));
+    timeModelInt.time4 = int.parse(timeModelStr.time4!.substring(0, 2)) * 60 +
+        int.parse(timeModelStr.time4!.substring(3, 5));
+    timeModelInt.time5 = int.parse(timeModelStr.time5!.substring(0, 2)) * 60 +
+        int.parse(timeModelStr.time5!.substring(3, 5));
   }
 
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    prayertimeList.isNotEmpty ? findRemainingTime() : null;
 
     return Scaffold(
       appBar: AppBar(

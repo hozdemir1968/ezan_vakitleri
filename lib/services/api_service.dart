@@ -1,12 +1,15 @@
 import 'dart:convert';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:http/http.dart' as http;
 import '../models/mycountry.dart';
 import '../models/mystate.dart';
 import '../models/mytown.dart';
 import '../models/prayertime.dart';
 import '../statics/statics.dart';
-import 'package:http/http.dart' as http;
 
-class ApiServices {
+final apiServiceProvider = Provider<ApiService>((ref) => ApiService());
+
+class ApiService {
   Future<List<MyCountry>> getCountries() async {
     final response = await http.get(Uri.parse(Statics.countriesUrl));
     if (response.statusCode == 200) {

@@ -1,3 +1,4 @@
+//
 class Statics {
   static const countriesUrl =
       'https://j2b9dc7n53.execute-api.us-east-1.amazonaws.com/dev/countries';
