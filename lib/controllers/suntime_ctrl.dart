@@ -9,7 +9,6 @@ class SuntimeCtrl {
   final geolocatorCtrl = GeolocatorCtrl();
   SunrisesetM sunriseSunsetM = SunrisesetM();
   SunrisesetVM sunriseSunsetVM = SunrisesetVM(
-    hasPermission: false,
     lat: "0",
     lng: "0",
     date: DateTime.now(),
@@ -25,25 +24,21 @@ class SuntimeCtrl {
   );
 
   Future<SunrisesetVM> getSunriseSunset() async {
-    sunriseSunsetVM.hasPermission = await geolocatorCtrl.getLocationPermission();
-    if (sunriseSunsetVM.hasPermission!) {
-      MyPosition myPositionM = await geolocatorCtrl.getPosition();
-      myPositionM.hasPermission = true;
-      if (myPositionM.lat != 0 && myPositionM.lng != 0) {
-        sunriseSunsetVM.lat = myPositionM.lat.toString();
-        sunriseSunsetVM.lng = myPositionM.lng.toString();
-        sunriseSunsetVM.date = DateTime.now();
-        sunriseSunsetVM.formatted = "0";
-        sunriseSunsetM = await apiService.getSunriseSunset(sunriseSunsetVM);
-        sunriseSunsetVM.suntimes = [
-          DateTime.parse(sunriseSunsetM.results!.astronomicalTwilightBegin!),
-          DateTime.parse(sunriseSunsetM.results!.sunrise!),
-          DateTime.parse(sunriseSunsetM.results!.solarNoon!),
-          DateTime.parse(sunriseSunsetM.results!.sunset!),
-          DateTime.parse(sunriseSunsetM.results!.astronomicalTwilightEnd!),
-        ];
-        sunriseSunsetVM.dayLength = sunriseSunsetM.results!.dayLength;
-      }
+    MyPosition myPosition = await geolocatorCtrl.getPosition();
+    if (myPosition.lat != 0 && myPosition.lng != 0) {
+      sunriseSunsetVM.lat = myPosition.lat.toString();
+      sunriseSunsetVM.lng = myPosition.lng.toString();
+      sunriseSunsetVM.date = DateTime.now();
+      sunriseSunsetVM.formatted = "0";
+      sunriseSunsetM = await apiService.getSunriseSunset(sunriseSunsetVM);
+      sunriseSunsetVM.suntimes = [
+        DateTime.parse(sunriseSunsetM.results!.astronomicalTwilightBegin!),
+        DateTime.parse(sunriseSunsetM.results!.sunrise!),
+        DateTime.parse(sunriseSunsetM.results!.solarNoon!),
+        DateTime.parse(sunriseSunsetM.results!.sunset!),
+        DateTime.parse(sunriseSunsetM.results!.astronomicalTwilightEnd!),
+      ];
+      sunriseSunsetVM.dayLength = sunriseSunsetM.results!.dayLength;
     }
     return sunriseSunsetVM;
   }

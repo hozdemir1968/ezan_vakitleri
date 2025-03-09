@@ -5,7 +5,6 @@ import 'package:get/get.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 import '../components/styles.dart';
 import '../controllers/geolocator_ctrl.dart';
-import '../controllers/compass_ctrl.dart';
 import '../models/myposition.dart';
 
 class CompassPage extends StatefulWidget {
@@ -18,25 +17,18 @@ class CompassPage extends StatefulWidget {
 }
 
 class _CompassPageState extends State<CompassPage> {
-  CompassCtrl compassCtrl = CompassCtrl();
+  final geolocatorCtrl = GeolocatorCtrl();
   double heading = 0;
   double pressure = 0;
-  final geolocatorCtrl = GeolocatorCtrl();
-  MyPosition myPositionM = MyPosition(
-    hasPermission: false,
-    lat: 0.0,
-    lng: 0.0,
-    alt: 0.0,
-    bearing: 0.0,
-  );
+  bool hasLocationPermission = false;
+  MyPosition myPosition = MyPosition(lat: 0.0, lng: 0.0, alt: 0.0, bearing: 0.0);
   final streamSubscriptions = <StreamSubscription<dynamic>>[];
   bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    fetchData();
-    startSubscriptions();
+    getPosition();
   }
 
   @override
@@ -47,50 +39,56 @@ class _CompassPageState extends State<CompassPage> {
     }
   }
 
-  Future<void> fetchData() async {
-    myPositionM = await compassCtrl.getMyPosition();
+  Future<void> getPosition() async {
+    hasLocationPermission = await geolocatorCtrl.getLocationPermission();
+    if (hasLocationPermission) {
+      myPosition = await geolocatorCtrl.getPosition();
+      startSubscriptions();
+    }
     setState(() {
-      myPositionM.hasPermission ? isLoading = false : isLoading = true;
+      isLoading = false;
     });
   }
 
   void startSubscriptions() async {
-    bool hasPermission = await geolocatorCtrl.getLocationPermission();
-    if (hasPermission) {
-      streamSubscriptions.add(
-        magnetometerEventStream(samplingPeriod: Duration(milliseconds: 1000)).listen((
-          MagnetometerEvent event,
-        ) {
-          heading = atan2(event.x, event.y);
-          heading = heading * 180 / pi;
-          if (heading > 0) {
-            heading -= 360;
-          }
-          setState(() {
-            heading = -1 * heading;
-          });
-        }),
-      );
-      streamSubscriptions.add(
-        barometerEventStream(samplingPeriod: Duration(milliseconds: 1000)).listen((
-          BarometerEvent event2,
-        ) {
-          setState(() {
-            pressure = event2.pressure;
-          });
-        }),
-      );
-    }
+    streamSubscriptions.add(
+      magnetometerEventStream(samplingPeriod: Duration(milliseconds: 1000)).listen((
+        MagnetometerEvent event,
+      ) {
+        heading = atan2(event.x, event.y);
+        heading = heading * 180 / pi;
+        if (heading > 0) {
+          heading -= 360;
+        }
+        setState(() {
+          heading = -1 * heading;
+        });
+      }),
+    );
+    streamSubscriptions.add(
+      barometerEventStream(samplingPeriod: Duration(milliseconds: 1000)).listen((
+        BarometerEvent event2,
+      ) {
+        setState(() {
+          pressure = event2.pressure;
+        });
+      }),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('pusula'.tr), centerTitle: true, elevation: 4),
-      body:
-          isLoading
-              ? Center(child: CircularProgressIndicator())
-              : hasDataWidget(myPositionM, heading, pressure),
+      body: RefreshIndicator(
+        onRefresh: () => getPosition(),
+        child:
+            isLoading
+                ? Center(child: CircularProgressIndicator())
+                : hasLocationPermission
+                ? hasDataWidget(myPosition, heading, pressure)
+                : noDataWidget(),
+      ),
     );
   }
 
@@ -144,5 +142,9 @@ class _CompassPageState extends State<CompassPage> {
         ),
       ),
     );
+  }
+
+  Widget noDataWidget() {
+    return Center(child: Text('Konum Erişimi Kapalı'));
   }
 }

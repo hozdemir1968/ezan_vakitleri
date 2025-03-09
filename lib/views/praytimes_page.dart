@@ -51,7 +51,7 @@ class _PraytimesPageState extends State<PraytimesPage> {
   }
 
   Widget hasDataWidget(List<PraytimesVM> praytimes) {
-    String lngCode = box.read('lngCode');
+    String lngCode = box.read('lngCode') ?? 'en';
     final vakits = [
       'imsak'.tr,
       'gunes'.tr,

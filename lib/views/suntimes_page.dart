@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../components/styles.dart';
+import '../controllers/geolocator_ctrl.dart';
 import '../models/sunriseset_v_m.dart';
 
 class SuntimesPage extends StatefulWidget {
@@ -16,8 +17,10 @@ class SuntimesPage extends StatefulWidget {
 }
 
 class _SuntimesPageState extends State<SuntimesPage> {
+  final geolocatorCtrl = GeolocatorCtrl();
   final suntimeCtrl = SuntimeCtrl();
   SunrisesetVM sunrisesetVM = SunrisesetVM();
+  bool hasLocationPermission = false;
   bool isLoading = true;
 
   @override
@@ -27,9 +30,12 @@ class _SuntimesPageState extends State<SuntimesPage> {
   }
 
   Future<void> fetchData() async {
-    sunrisesetVM = await suntimeCtrl.getSunriseSunset();
+    hasLocationPermission = await geolocatorCtrl.getLocationPermission();
+    if (hasLocationPermission) {
+      sunrisesetVM = await suntimeCtrl.getSunriseSunset();
+    }
     setState(() {
-      sunrisesetVM.hasPermission! ? isLoading = false : isLoading = true;
+      isLoading = false;
     });
   }
 
@@ -46,7 +52,9 @@ class _SuntimesPageState extends State<SuntimesPage> {
         child:
             isLoading
                 ? Center(child: CircularProgressIndicator())
-                : hasDataWidget(sunrisesetVM),
+                : hasLocationPermission
+                ? hasDataWidget(sunrisesetVM)
+                : noDataWidget(),
       ),
     );
   }
@@ -185,5 +193,9 @@ class _SuntimesPageState extends State<SuntimesPage> {
         ),
       ),
     );
+  }
+
+  Widget noDataWidget() {
+    return Center(child: Text('Konum Erişimi Kapalı'));
   }
 }

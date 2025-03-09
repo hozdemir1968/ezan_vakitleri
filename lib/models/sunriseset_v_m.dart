@@ -1,5 +1,4 @@
 class SunrisesetVM {
-  bool? hasPermission;
   String? lat;
   String? lng;
   DateTime? date;
@@ -8,7 +7,6 @@ class SunrisesetVM {
   List<DateTime>? suntimes = [];
 
   SunrisesetVM({
-    this.hasPermission,
     this.lat,
     this.lng,
     this.date,
