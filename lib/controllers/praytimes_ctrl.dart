@@ -1,13 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-import '../models/notification_m.dart';
 import '../models/praytimes_vm.dart';
 import '../services/api_service.dart';
 import '../services/db_service.dart';
 import '../models/mypraytime.dart';
-import '../services/notification_service.dart';
-import 'notification_ctrl.dart';
 
 class PraytimesCtrl {
   final ApiService apiService = ApiService();
@@ -15,16 +11,6 @@ class PraytimesCtrl {
   final box = GetStorage();
   List<MyPraytime> praytimeList = [];
   DailyVM dailyVM = DailyVM();
-  List<NotificationM> notificationList = [];
-  final NotificationCtrl notificationCtrl = NotificationCtrl();
-  final vakits = [
-    'imsak'.tr,
-    'gunes'.tr,
-    'oglen'.tr,
-    'ikindi'.tr,
-    'aksam'.tr,
-    'yatsi'.tr,
-  ];
 
   Future<List<PraytimesVM>> getPraytimesVMList() async {
     int townId = box.read("townId") ?? -1;
@@ -55,9 +41,7 @@ class PraytimesCtrl {
         praytimesVMList.add(model);
       }
     }
-    dailyVM = await getDaily();
     praytimesVMList[0].dailyVM = dailyVM;
-    await setNotifications(praytimesVMList);
     return praytimesVMList;
   }
 
@@ -73,6 +57,7 @@ class PraytimesCtrl {
       if (saveDate.month == today.month && saveDate.day == today.day) {
         debugPrint("DB");
         praytimeList = await dbService.getPrayTimes(townId);
+        dailyVM = await dbService.getDaily();
       } else {
         debugPrint("API");
         praytimeList = await apiService.getPrayTimes(townId);
@@ -99,35 +84,6 @@ class PraytimesCtrl {
     final hour = int.parse(parts[0]);
     final minute = int.parse(parts[1]);
     return DateTime(year, month, day, hour, minute);
-  }
-
-  Future<DailyVM> getDaily() async {
-    DailyVM dailyVM;
-    try {
-      dailyVM = await dbService.getDaily();
-    } catch (e) {
-      rethrow;
-    }
-    return dailyVM;
-  }
-
-  Future<void> setNotifications(List<PraytimesVM> praytimesVMList) async {
-    notificationList = await notificationCtrl.loadSettings();
-    NotificationService.cancelNotifications();
-    for (var i = 0; i < 6; i++) {
-      if (notificationList[i].setted!) {
-        DateTime scheduledDate = praytimesVMList[0].praytimes![i].add(
-          Duration(minutes: notificationList[i].timeInMinutes!),
-        );
-        debugPrint(scheduledDate.toString());
-        NotificationService.scheduleNotification(
-          i,
-          'Ezan Vakti',
-          '${vakits[i]} Vakti Yaklaşıyor!',
-          scheduledDate,
-        );
-      }
-    }
   }
 
   Future<void> savePraytimesToDB(List praytimeList, DateTime today, int townId) async {

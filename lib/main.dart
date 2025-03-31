@@ -1,11 +1,11 @@
-import 'package:ezan_vakitleri/components/messages.dart';
-import 'package:ezan_vakitleri/controllers/approutes.dart';
-import 'package:ezan_vakitleri/controllers/praytimes_ctrl.dart';
-import 'package:ezan_vakitleri/services/notification_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:workmanager/workmanager.dart';
+import 'components/messages.dart';
+import 'controllers/approutes.dart';
+import 'controllers/notification_ctrl.dart';
+import 'services/notification_service.dart';
 import 'components/custom_theme.dart';
 import 'controllers/language_ctrl.dart';
 import 'controllers/theme_ctrl.dart';
@@ -15,7 +15,7 @@ import 'package:timezone/data/latest.dart' as tz;
 void callbackDispatcher() {
   Workmanager().executeTask((task, inputData) async {
     try {
-      await PraytimesCtrl().getPraytimesVMList();
+      await NotificationCtrl().setNotifications();
       return Future.value(true);
     } catch (error) {
       return Future.error(error);
@@ -29,18 +29,12 @@ void main() async {
   tz.initializeTimeZones();
   await GetStorage.init();
   DateTime thisDate = DateTime.now();
-  thisDate = DateTime(
-    thisDate.year,
-    thisDate.month,
-    thisDate.day,
-    thisDate.hour,
-    thisDate.minute,
-  );
-  DateTime nextDate = DateTime(thisDate.year, thisDate.month, thisDate.day, 0, 30);
+  thisDate = DateTime(thisDate.year, thisDate.month, thisDate.day, thisDate.hour);
+  DateTime nextDate = DateTime(thisDate.year, thisDate.month, thisDate.day, 1);
   if (thisDate.isAfter(nextDate)) {
     nextDate = nextDate.add(Duration(days: 1));
   }
-  Workmanager().initialize(callbackDispatcher, isInDebugMode: true);
+  Workmanager().initialize(callbackDispatcher, isInDebugMode: false);
   Workmanager().registerPeriodicTask(
     "dailyEzanUpdate",
     "fetchEzanTimes",

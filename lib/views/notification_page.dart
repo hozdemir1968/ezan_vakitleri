@@ -18,7 +18,6 @@ class NotificationPage extends StatefulWidget {
 class _NotificationPageState extends State<NotificationPage> {
   final NotificationCtrl notificationCtrl = NotificationCtrl();
   final DBService dbService = DBService();
-  bool isNotify = false;
   bool isLoading = true;
   Timer? timer;
   List<NotificationM> notificationList = [];
@@ -27,7 +26,6 @@ class _NotificationPageState extends State<NotificationPage> {
   void initState() {
     super.initState();
     getNotifications();
-    isNotify = true;
   }
 
   @override
@@ -116,7 +114,10 @@ class _NotificationPageState extends State<NotificationPage> {
           widgetRow(data, 5, colWidth),
           SizedBox(height: spaceHeight * 2),
           ElevatedButton(
-            onPressed: saveNotifications,
+            onPressed: () async {
+              await saveNotifications();
+              await NotificationCtrl().setNotifications();
+            },
             child: Text('kaydet'.tr, style: textStyle16B()),
           ),
           SizedBox(height: spaceHeight),
@@ -194,55 +195,3 @@ class _NotificationPageState extends State<NotificationPage> {
     );
   }
 }
-
-/*
-        Expanded(
-          flex: colWidth[2],
-          child: GestureDetector(
-            onTap: () {
-              setState(() {
-                data[index].setted!
-                    ? data[index].setted = false
-                    : data[index].setted = true;
-              });
-            },
-            child:
-                data[index].setted!
-                    ? Icon(Icons.lightbulb_outline)
-                    : Icon(Icons.lightbulb),
-          ),
-        ),
-
-
-        Expanded(
-          flex: colWidth[5],
-          child: Material(
-            borderRadius: BorderRadius.circular(15),
-            elevation: 3,
-            child: GestureDetector(
-              onTap: () {
-                setState(() {
-                  data[index].timeInMinutes! < 59
-                      ? data[index].timeInMinutes = data[index].timeInMinutes! + 1
-                      : data[index].timeInMinutes = data[index].timeInMinutes;
-                });
-              },
-              onLongPress: () {
-                timer = Timer.periodic(Duration(milliseconds: 75), (timer) {
-                  setState(() {
-                    data[index].timeInMinutes! < 59
-                        ? data[index].timeInMinutes = data[index].timeInMinutes! + 1
-                        : data[index].timeInMinutes = data[index].timeInMinutes;
-                  });
-                });
-              },
-              onLongPressEnd: (details) => timer?.cancel(),
-              child: Container(
-                alignment: Alignment.center,
-                decoration: BoxDecoration(borderRadius: BorderRadius.circular(20)),
-                child: Text("+", style: textStyle20B()),
-              ),
-            ),
-          ),
-        ),
-        */
